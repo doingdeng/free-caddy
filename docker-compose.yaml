@@ -1,5 +1,5 @@
 services:
-  okteto-free:
+  free-caddy:
     build: .
     ports:
       - "8080:8080"
