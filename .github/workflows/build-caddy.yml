@@ -95,9 +95,6 @@ jobs:
       GOARM: ${{ matrix.goarm }}
       CGO_ENABLED: 0
     steps:
-      - name: Checkout codebase
-        uses: actions/checkout@v3
-
       - name: Show workflow information 
         run: |
           export _NAME=$(jq ".[\"$GOOS-$GOARCH$GOARM$GOMIPS\"].friendlyName" -r < .github/build/friendly-filenames.json)
@@ -110,61 +107,59 @@ jobs:
           go-version: '1.20'
           check-latest: true
 
-      - name: Get project dependencies
-        run: go mod download
+      - name: Build xcaddy
+        run: go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
       
-      - name: Replace Custom to Commit ID
-        if: github.event_name != 'release'
-        run: |
-          ID=$(git rev-parse --short ${{ github.sha }})
-          if [ "${{ github.event_name }}" == 'pull_request' ]
-          then
-            ID=$(git rev-parse --short ${{ github.event.pull_request.head.sha }})
-          fi
-          sed -i '/build/ s/Custom/'$ID'/' ./core/core.go
+      # - name: Replace Custom to Commit ID
+      #   if: github.event_name != 'release'
+      #   run: |
+      #     ID=$(git rev-parse --short ${{ github.sha }})
+      #     if [ "${{ github.event_name }}" == 'pull_request' ]
+      #     then
+      #       ID=$(git rev-parse --short ${{ github.event.pull_request.head.sha }})
+      #     fi
+      #     sed -i '/build/ s/Custom/'$ID'/' ./core/core.go
  
-      - name: Build Xray
+      - name: Build caddy-trojan
+        run: xcaddy build --with github.com/imgk/caddy-trojan
+
+
+      - name: Show info
         run: |
-          mkdir -p build_assets
-          go build -v -o build_assets/web -trimpath -ldflags "-s -w -buildid=" ./main
+          pwd
+          ls -al
 
 
-      - name: Restore Cache
-        uses: actions/cache/restore@v3
-        with:
-          path: resources
-          key: xray-geodat-
 
+      # - name: Create ZIP archive
+      #   shell: bash
+      #   run: |
+      #     pushd build_assets || exit 1
+      #     touch -mt $(date +%Y01010000) *
+      #     zip -9vr ../Web-${{ env.ASSET_NAME }}.zip .
+      #     popd || exit 1
+      #     FILE=./Web-${{ env.ASSET_NAME }}.zip
+      #     DGST=$FILE.dgst
+      #     for METHOD in {"md5","sha1","sha256","sha512"}
+      #     do
+      #       openssl dgst -$METHOD $FILE | sed 's/([^)]*)//g' >>$DGST
+      #     done
 
-      - name: Create ZIP archive
-        shell: bash
-        run: |
-          pushd build_assets || exit 1
-          touch -mt $(date +%Y01010000) *
-          zip -9vr ../Web-${{ env.ASSET_NAME }}.zip .
-          popd || exit 1
-          FILE=./Web-${{ env.ASSET_NAME }}.zip
-          DGST=$FILE.dgst
-          for METHOD in {"md5","sha1","sha256","sha512"}
-          do
-            openssl dgst -$METHOD $FILE | sed 's/([^)]*)//g' >>$DGST
-          done
+      # - name: Change the name
+      #   run: |
+      #     mv build_assets Web-${{ env.ASSET_NAME }}
 
-      - name: Change the name
-        run: |
-          mv build_assets Web-${{ env.ASSET_NAME }}
+      # - name: Upload files to Artifacts
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: Web-${{ env.ASSET_NAME }}
+      #     path: |
+      #       ./Web-${{ env.ASSET_NAME }}/*
 
-      - name: Upload files to Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: Web-${{ env.ASSET_NAME }}
-          path: |
-            ./Web-${{ env.ASSET_NAME }}/*
-
-      - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./Web-${{ env.ASSET_NAME }}.zip*
-          tag: ${{ github.ref }}
-          file_glob: true
+      # - name: Upload binaries to release
+      #   uses: svenstaro/upload-release-action@v2
+      #   with:
+      #     repo_token: ${{ secrets.GITHUB_TOKEN }}
+      #     file: ./Web-${{ env.ASSET_NAME }}.zip*
+      #     tag: ${{ github.ref }}
+      #     file_glob: true
