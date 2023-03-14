@@ -16,10 +16,6 @@ jobs:
         run: go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
       - name: Build caddy-trojan
         run: xcaddy build --with github.com/imgk/caddy-trojan
-      - name: Show info
-        run: |
-          pwd
-          ls -al
 
       - name: Upload files to Artifacts
         uses: actions/upload-artifact@v3
