@@ -1,0 +1,5 @@
+services:
+  okteto-free:
+    build: .
+    ports:
+      - "8080:8080"
