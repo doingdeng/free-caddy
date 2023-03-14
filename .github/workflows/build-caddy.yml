@@ -109,6 +109,14 @@ jobs:
 
       - name: Build xcaddy
         run: go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
+
+      - name: Show
+        run: |
+          pwd
+          ls -al
+          type go
+          echo $GOPATH/bin
+          ls -al $GOPATH/bin
       
       # - name: Replace Custom to Commit ID
       #   if: github.event_name != 'release'
