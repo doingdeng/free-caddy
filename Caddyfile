@@ -1,0 +1,22 @@
+{
+	order trojan before file_server
+	servers :8080 {
+		listener_wrappers {
+			trojan
+		}
+	}
+	trojan {
+		caddy
+		no_proxy
+		users doing
+	}
+}
+:8080 {
+	trojan {
+		connect_method
+		websocket
+	}
+	file_server {
+		root html
+	}
+}
