@@ -13,7 +13,6 @@
 }
 :8080 {
 	trojan {
-		tls internal
 		connect_method
 		websocket
 	}
