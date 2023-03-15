@@ -1,4 +1,4 @@
-name: Build and Release
+name: Build caddy-trojan
 
 on:
   workflow_dispatch:
