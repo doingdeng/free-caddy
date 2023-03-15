@@ -7,4 +7,5 @@ WORKDIR /root
 
 RUN chmod +x caddy
 
-CMD ./caddy start --config Caddyfile --adapter caddyfile
+# CMD ./caddy start --config Caddyfile --adapter caddyfile
+ CMD ["./caddy", "start", "--config", "Caddyfile", "--adapter", "caddyfile"]
