@@ -1,4 +1,5 @@
 {
+	auto_https off
 	order trojan before file_server
 	servers :8080 {
 		listener_wrappers {
